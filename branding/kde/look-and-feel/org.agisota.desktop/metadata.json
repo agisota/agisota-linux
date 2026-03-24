@@ -1,0 +1,17 @@
+{
+    "KPlugin": {
+        "Authors": [
+            {
+                "Email": "mark@agisota.com",
+                "Name": "AGISOTA"
+            }
+        ],
+        "Description": "AGISOTA Linux — dark theme with orange accents, Victor Mono font",
+        "Id": "org.agisota.desktop",
+        "License": "MIT",
+        "Name": "AGISOTA",
+        "Version": "1.0.0",
+        "Website": "https://github.com/agisota/agisota-linux"
+    },
+    "KPackageStructure": "Plasma/LookAndFeel"
+}

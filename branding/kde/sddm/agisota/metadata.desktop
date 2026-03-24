@@ -1,0 +1,13 @@
+[SddmGreeterTheme]
+Name=AGISOTA
+Description=AGISOTA Linux login theme — dark with orange accents
+Author=AGISOTA
+Copyright=MIT
+License=MIT
+Type=sddm-theme
+Version=1.0.0
+Website=https://github.com/agisota/agisota-linux
+Screenshot=preview.png
+MainScript=Main.qml
+ConfigFile=theme.conf
+TranslationsDirectory=translations

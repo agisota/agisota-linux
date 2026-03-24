@@ -1,0 +1,49 @@
+# AGISOTA Linux — Desktop packages
+# KDE Plasma + essential desktop apps
+
+# KDE Plasma
+plasma-desktop
+plasma-workspace
+plasma-nm
+plasma-pa
+plasma-systemmonitor
+plasma-discover
+sddm
+sddm-kcm
+kde-gtk-config
+kdeplasma-addons
+kscreen
+kwalletmanager
+spectacle
+gwenview
+ark
+dolphin
+konsole
+kate
+okular
+kcalc
+
+# Theming
+kvantum
+papirus-icon-theme
+breeze-cursor-theme
+
+# Wayland
+xdg-desktop-portal-kde
+xdg-utils
+qt6-qtwayland
+
+# Audio/Video
+pipewire
+wireplumber
+pavucontrol
+obs-studio
+
+# System
+flatpak
+firewalld
+ufw
+
+# Input methods (Russian + English)
+fcitx5
+fcitx5-configtool

@@ -1,0 +1,30 @@
+# AGISOTA Linux — Flatpak applications
+# Install: flatpak install flathub <app-id>
+
+# Browsers
+com.brave.Browser
+org.chromium.Chromium
+
+# Communication
+org.telegram.desktop
+# LarkSuite — AppImage from official site
+
+# Notes & Knowledge
+md.obsidian.Obsidian
+
+# Editors
+# com.vscodium.codium  # or code-oss from repo
+dev.zed.Zed
+
+# Media
+com.obsproject.Studio
+# org.gimp.GIMP
+# org.inkscape.Inkscape
+
+# Utilities
+org.kde.filelight
+com.github.tchx84.Flatseal
+io.github.celluloid_player.Celluloid
+
+# Database GUI
+# io.dbeaver.DBeaverCommunity

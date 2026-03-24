@@ -1,0 +1,7 @@
+output/
+*.raw
+*.raw.zst
+*.iso
+/tmp/
+.DS_Store
+.omc/

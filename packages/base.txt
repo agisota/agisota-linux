@@ -1,0 +1,74 @@
+# AGISOTA Linux — Base packages
+# Core system + utilities
+
+# System
+kernel-16k
+linux-firmware
+asahi-firmware
+mesa-asahi
+asahi-audio
+asahi-platform-metapackage
+
+# Base utilities
+zsh
+tmux
+htop
+btop
+ripgrep
+fd-find
+bat
+eza
+fzf
+jq
+yq
+tree
+wget
+curl
+unzip
+p7zip
+xclip
+wl-clipboard
+
+# Network
+NetworkManager
+NetworkManager-wifi
+iwd
+tailscale
+wireguard-tools
+
+# Filesystem
+btrfs-progs
+ntfs-3g
+exfatprogs
+
+# Development base
+git
+git-lfs
+gcc
+g++
+make
+cmake
+python3
+python3-pip
+nodejs
+npm
+rustup
+
+# Containers
+podman
+podman-compose
+buildah
+skopeo
+docker-ce
+docker-compose-plugin
+
+# Fonts
+victor-mono-fonts
+google-noto-fonts-common
+google-noto-sans-fonts
+google-noto-sans-mono-fonts
+google-noto-serif-fonts
+google-noto-cjk-fonts
+google-noto-emoji-fonts
+jetbrains-mono-fonts
+fira-code-fonts

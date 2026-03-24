@@ -1,0 +1,31 @@
+[Desktop]
+Theme=default
+ColorScheme=AGISOTA
+WidgetStyle=kvantum-dark
+
+[kdeglobals][General]
+font=Noto Sans,10,-1,5,400,0,0,0,0,0,0,0,0,0,0,1
+fixed=Victor Mono,13,-1,5,400,0,0,0,0,0,0,0,0,0,0,1
+smallestReadableFont=Noto Sans,8,-1,5,400,0,0,0,0,0,0,0,0,0,0,1
+toolBarFont=Noto Sans,10,-1,5,400,0,0,0,0,0,0,0,0,0,0,1
+menuFont=Noto Sans,10,-1,5,400,0,0,0,0,0,0,0,0,0,0,1
+
+[kdeglobals][Icons]
+Theme=Papirus-Dark
+
+[kdeglobals][KDE]
+LookAndFeelPackage=org.agisota.desktop
+SingleClick=false
+
+[plasmarc][Theme]
+name=breeze-dark
+
+[Wallpaper]
+Image=agisota-default
+
+[SDDM]
+Theme=agisota
+
+[KSplash]
+Theme=org.agisota.desktop
+Engine=none

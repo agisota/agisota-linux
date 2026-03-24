@@ -1,0 +1,8 @@
+[Plymouth Theme]
+Name=AGISOTA
+Description=AGISOTA Linux boot splash — dark with orange accent
+ModuleName=script
+
+[script]
+ImageDir=/usr/share/plymouth/themes/agisota
+ScriptFile=/usr/share/plymouth/themes/agisota/agisota.script

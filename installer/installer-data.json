@@ -1,0 +1,25 @@
+{
+    "installer_version": "0.8.0",
+    "os_list": [
+        {
+            "name": "AGISOTA Linux (KDE Plasma)",
+            "default_os_name": "AGISOTA Linux",
+            "boot_object": "m1n1.bin",
+            "next_object": "m1n1/m1n1.macho",
+            "package": "agisota-kde-desktop",
+            "expand_slug": "agisota",
+            "extras": {
+                "grub": {
+                    "grub_cfg": "grub/grub.cfg"
+                }
+            },
+            "supported_fw": ["13.5", "14.0"],
+            "min_macos_version": [13, 5],
+            "min_iboot_version": "iBoot-10151.101.1",
+            "icon": "https://raw.githubusercontent.com/agisota/agisota-linux/main/branding/logo/agisota-logo.png",
+            "description": "AGISOTA Linux — кастомная Fedora Asahi Remix для Apple Silicon. KDE Plasma, Victor Mono, русский язык, AI/dev стек из коробки.",
+            "vol_group_min": 53687091200
+        }
+    ],
+    "note": "This is a template. For production use, build the actual image with scripts/build-image.sh and update the package URLs."
+}

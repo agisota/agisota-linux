@@ -1,0 +1,62 @@
+# AGISOTA Linux — Developer tools
+# Installed via dnf, npm, cargo, pip, curl
+
+# --- dnf packages ---
+ShellCheck
+ansible
+httpie
+lazygit
+neovim
+postgresql
+sqlite
+direnv
+strace
+perf
+
+# --- npm global ---
+# npm install -g
+pnpm
+tsx
+bun
+
+# --- pip ---
+# pip install
+uv
+ruff
+ipython
+
+# --- cargo ---
+# cargo install
+starship
+zoxide
+tokei
+hyperfine
+delta
+
+# --- curl/binary installs ---
+# Pulumi
+# curl -fsSL https://get.pulumi.com | sh
+
+# Temporal CLI
+# curl -sSf https://temporal.download/cli.sh | sh
+
+# Claude Code
+# npm install -g @anthropic-ai/claude-code
+
+# OpenCode
+# curl -fsSL https://opencode.ai/install | sh
+
+# Codex CLI
+# npm install -g @openai/codex
+
+# Ghostty terminal
+# Built from source or Copr
+
+# Go
+# dnf install golang
+
+# Deno
+# curl -fsSL https://deno.land/install.sh | sh
+
+# Bun
+# curl -fsSL https://bun.sh/install | bash
