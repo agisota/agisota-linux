@@ -2,24 +2,41 @@
     "installer_version": "0.8.0",
     "os_list": [
         {
-            "name": "AGISOTA Linux (KDE Plasma)",
+            "name": "AGISOTA Linux with KDE Plasma",
             "default_os_name": "AGISOTA Linux",
             "boot_object": "m1n1.bin",
-            "next_object": "m1n1/m1n1.macho",
-            "package": "agisota-kde-desktop",
-            "expand_slug": "agisota",
-            "extras": {
-                "grub": {
-                    "grub_cfg": "grub/grub.cfg"
+            "next_object": "m1n1/boot.bin",
+            "package": "https://github.com/agisota/agisota-linux/releases/latest/download/agisota-kde.zip",
+            "icon": "agisota.icns",
+            "supported_fw": ["12.3", "12.3.1", "13.5"],
+            "expert": false,
+            "external_boot": false,
+            "extras": [],
+            "partitions": [
+                {
+                    "name": "EFI",
+                    "type": "EFI",
+                    "size": "524288000B",
+                    "format": "fat",
+                    "volume_id": "0xAE150TA",
+                    "copy_firmware": true,
+                    "copy_installer_data": true,
+                    "source": "esp"
+                },
+                {
+                    "name": "Boot",
+                    "type": "Linux",
+                    "size": "1073741824B",
+                    "image": "boot.img"
+                },
+                {
+                    "name": "Root",
+                    "type": "Linux",
+                    "size": "15032385536B",
+                    "expand": true,
+                    "image": "root.img"
                 }
-            },
-            "supported_fw": ["13.5", "14.0"],
-            "min_macos_version": [13, 5],
-            "min_iboot_version": "iBoot-10151.101.1",
-            "icon": "https://raw.githubusercontent.com/agisota/agisota-linux/main/branding/logo/agisota-logo.png",
-            "description": "AGISOTA Linux — кастомная Fedora Asahi Remix для Apple Silicon. KDE Plasma, Victor Mono, русский язык, AI/dev стек из коробки.",
-            "vol_group_min": 53687091200
+            ]
         }
-    ],
-    "note": "This is a template. For production use, build the actual image with scripts/build-image.sh and update the package URLs."
+    ]
 }
