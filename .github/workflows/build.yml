@@ -1,0 +1,237 @@
+name: Build AGISOTA Linux
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      base_image_url:
+        description: 'Fedora Asahi KDE image URL (leave empty for latest)'
+        required: false
+        default: ''
+
+env:
+  BASE_IMAGE_URL: 'https://asahilinux-fedora.b-cdn.net/os/fedora-42-kde-202504161600.zip'
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 120
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set image URL
+        run: |
+          if [ -n "${{ inputs.base_image_url }}" ]; then
+            echo "IMAGE_URL=${{ inputs.base_image_url }}" >> "$GITHUB_ENV"
+          else
+            echo "IMAGE_URL=${{ env.BASE_IMAGE_URL }}" >> "$GITHUB_ENV"
+          fi
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            qemu-utils e2fsprogs dosfstools \
+            zstd unzip zip p7zip-full \
+            python3 util-linux kpartx \
+            arch-install-scripts
+
+      - name: Free disk space
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc
+          df -h /
+
+      - name: Download base Fedora Asahi KDE image
+        run: |
+          echo "Downloading: $IMAGE_URL"
+          curl -fSL "$IMAGE_URL" -o /tmp/fedora-asahi-kde.zip
+          ls -lh /tmp/fedora-asahi-kde.zip
+
+      - name: Extract and mount images
+        run: |
+          mkdir -p /tmp/asahi-extract /tmp/agisota-root
+          cd /tmp/asahi-extract
+          unzip /tmp/fedora-asahi-kde.zip
+          ls -lah
+
+          # Find root.img and boot.img
+          ROOT_IMG=$(find . -name 'root.img' -o -name '*.root.img' | head -1)
+          BOOT_IMG=$(find . -name 'boot.img' -o -name '*.boot.img' | head -1)
+          ESP_DIR=$(find . -name 'esp' -type d | head -1)
+
+          echo "ROOT_IMG=$ROOT_IMG" >> "$GITHUB_ENV"
+          echo "BOOT_IMG=$BOOT_IMG" >> "$GITHUB_ENV"
+          echo "ESP_DIR=$(pwd)/$ESP_DIR" >> "$GITHUB_ENV"
+          echo "EXTRACT_DIR=$(pwd)" >> "$GITHUB_ENV"
+
+          echo "Root image: $ROOT_IMG ($(du -h "$ROOT_IMG" | cut -f1))"
+          echo "Boot image: $BOOT_IMG ($(du -h "$BOOT_IMG" | cut -f1))"
+
+      - name: Expand and mount root image
+        run: |
+          cd /tmp/asahi-extract
+
+          # Expand root image to have room for customization (+8GB)
+          truncate -s +8G "$ROOT_IMG"
+          LOOP=$(sudo losetup --find --show "$ROOT_IMG")
+          sudo e2fsck -fy "$LOOP" || true
+          sudo resize2fs "$LOOP"
+
+          # Mount
+          sudo mount "$LOOP" /tmp/agisota-root
+          echo "LOOP_DEV=$LOOP" >> "$GITHUB_ENV"
+
+          df -h /tmp/agisota-root
+
+      - name: Copy AGISOTA branding and scripts
+        run: |
+          ROOT=/tmp/agisota-root
+
+          # Copy entire repo into the image
+          sudo mkdir -p "$ROOT/tmp/agisota-linux"
+          sudo cp -r "$GITHUB_WORKSPACE"/* "$ROOT/tmp/agisota-linux/"
+
+          # Prepare DNS for chroot
+          sudo cp /etc/resolv.conf "$ROOT/etc/resolv.conf" 2>/dev/null || true
+
+      - name: Run AGISOTA transform in chroot
+        run: |
+          ROOT=/tmp/agisota-root
+
+          # Mount necessary filesystems
+          sudo mount --bind /dev "$ROOT/dev"
+          sudo mount --bind /dev/pts "$ROOT/dev/pts"
+          sudo mount -t proc proc "$ROOT/proc"
+          sudo mount -t sysfs sys "$ROOT/sys"
+
+          # Run transform.sh inside chroot (skip root/fedora checks)
+          sudo chroot "$ROOT" /bin/bash -c '
+            set -e
+            export REPO_DIR=/tmp/agisota-linux
+            export DEBIAN_FRONTEND=noninteractive
+
+            echo "=== AGISOTA Transform (chroot) ==="
+
+            # --- Branding ---
+            # Color scheme
+            mkdir -p /usr/share/color-schemes
+            cp "$REPO_DIR/branding/kde/color-scheme/AGISOTA.colors" /usr/share/color-schemes/
+
+            # KDE Look and Feel
+            mkdir -p /usr/share/plasma/look-and-feel
+            cp -r "$REPO_DIR/branding/kde/look-and-feel/org.agisota.desktop" /usr/share/plasma/look-and-feel/
+
+            # Konsole
+            mkdir -p /usr/share/konsole
+            cp "$REPO_DIR/branding/kde/konsole/AGISOTA.profile" /usr/share/konsole/
+            cp "$REPO_DIR/branding/kde/konsole/AGISOTA.colorscheme" /usr/share/konsole/
+
+            # Plymouth
+            mkdir -p /usr/share/plymouth/themes/agisota
+            cp "$REPO_DIR/branding/plymouth/agisota/agisota.plymouth" /usr/share/plymouth/themes/agisota/
+            cp "$REPO_DIR/branding/plymouth/agisota/agisota.script" /usr/share/plymouth/themes/agisota/
+            cp "$REPO_DIR/branding/logo/agisota-logo.png" /usr/share/plymouth/themes/agisota/logo.png
+            plymouth-set-default-theme agisota 2>/dev/null || true
+
+            # SDDM
+            mkdir -p /usr/share/sddm/themes/agisota
+            cp "$REPO_DIR/branding/kde/sddm/agisota/metadata.desktop" /usr/share/sddm/themes/agisota/
+            cp "$REPO_DIR/branding/kde/sddm/agisota/theme.conf" /usr/share/sddm/themes/agisota/
+            cp "$REPO_DIR/branding/kde/sddm/agisota/Main.qml" /usr/share/sddm/themes/agisota/
+            cp "$REPO_DIR/branding/logo/agisota-logo.png" /usr/share/sddm/themes/agisota/logo.png
+            if [ -f "$REPO_DIR/branding/wallpapers/agisota-final.png" ]; then
+              cp "$REPO_DIR/branding/wallpapers/agisota-final.png" /usr/share/sddm/themes/agisota/background.png
+            fi
+
+            mkdir -p /etc/sddm.conf.d
+            echo -e "[Theme]\nCurrent=agisota" > /etc/sddm.conf.d/agisota.conf
+
+            # Wallpaper
+            mkdir -p /usr/share/wallpapers/agisota/contents/images
+            if [ -f "$REPO_DIR/branding/wallpapers/agisota-final.png" ]; then
+              cp "$REPO_DIR/branding/wallpapers/agisota-final.png" /usr/share/wallpapers/agisota/contents/images/3456x2234.png
+              cp "$REPO_DIR/branding/wallpapers/agisota-default.png" /usr/share/wallpapers/agisota/contents/images/default.png
+            fi
+
+            # Fontconfig
+            cp "$REPO_DIR/config/fonts/99-agisota-fonts.conf" /etc/fonts/conf.d/
+
+            # --- Locale ---
+            cp "$REPO_DIR/config/locale/locale.conf" /etc/locale.conf
+            dnf install -y glibc-langpack-ru 2>/dev/null || true
+
+            # --- Victor Mono ---
+            if ! fc-list | grep -qi "Victor Mono"; then
+              mkdir -p /usr/share/fonts/victor-mono
+              curl -fsSL "https://github.com/rubjo/victor-mono/releases/download/v1.5.6/VictorMonoAll.zip" -o /tmp/vm.zip
+              unzip -o /tmp/vm.zip "OTF/*" -d /tmp/vm
+              cp /tmp/vm/OTF/*.otf /usr/share/fonts/victor-mono/
+              rm -rf /tmp/vm /tmp/vm.zip
+              fc-cache -fv >/dev/null 2>&1
+            fi
+
+            # --- Extra packages ---
+            dnf install -y \
+              zsh tmux htop btop ripgrep fd-find bat fzf jq wget curl \
+              git git-lfs python3-pip nodejs npm neovim \
+              kvantum papirus-icon-theme \
+              flatpak tailscale \
+              2>/dev/null || true
+
+            # --- npm globals ---
+            npm install -g pnpm @anthropic-ai/claude-code @openai/codex 2>/dev/null || true
+
+            # --- Starship ---
+            curl -fsSL https://starship.rs/install.sh | sh -s -- -y 2>/dev/null || true
+
+            # --- Flatpak ---
+            flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo 2>/dev/null || true
+
+            # --- Cleanup ---
+            rm -rf /tmp/agisota-linux
+            dnf clean all 2>/dev/null || true
+
+            echo "=== AGISOTA Transform Complete ==="
+          '
+
+          # Unmount chroot filesystems
+          sudo umount "$ROOT/sys" "$ROOT/proc" "$ROOT/dev/pts" "$ROOT/dev" || true
+
+      - name: Shrink and repackage image
+        run: |
+          ROOT=/tmp/agisota-root
+          cd /tmp/asahi-extract
+
+          # Unmount root
+          sudo umount "$ROOT" || true
+          sudo losetup -d "$LOOP_DEV" || true
+
+          # Shrink root image
+          sudo e2fsck -fy "$ROOT_IMG" || true
+          sudo resize2fs -M "$ROOT_IMG"
+
+          echo "Root image after transform: $(du -h "$ROOT_IMG" | cut -f1)"
+
+          # Repackage as AGISOTA zip
+          mkdir -p /tmp/agisota-output
+          zip -r /tmp/agisota-output/agisota-kde.zip . \
+            -x '.git/*'
+
+          ls -lh /tmp/agisota-output/agisota-kde.zip
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: agisota-linux-kde
+          path: /tmp/agisota-output/agisota-kde.zip
+          retention-days: 30
+
+      - name: Create Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: /tmp/agisota-output/agisota-kde.zip
+          generate_release_notes: true
